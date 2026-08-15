@@ -12,7 +12,7 @@ See [SPEC.md](SPEC.md) — the single source of truth for what, why, and how.
 
 ## Status
 
-**Phase 0 — Foundations.** Repo scaffold only. No feature implementation yet. See SPEC §25 for the roadmap.
+**In development.** Content pipeline, `hifz-core` engine, reading view, notes, audio, and the assisted-planning layer are implemented. Dashboard, onboarding, and the notes browser are still stubs. See SPEC §25 for phases and §26 for the v1.0 checklist.
 
 ## Stack
 
@@ -27,7 +27,21 @@ npm install
 npm run start
 ```
 
-Requires Node LTS + Expo CLI. iOS/Android targets (web in v1.1).
+Requires Node 20+. `.npmrc` sets `legacy-peer-deps` — a transitive `react-dom`
+peer range conflicts with React 19.
+
+## Web (PWA)
+
+The web target builds to an installable, offline-capable PWA and deploys to
+Cloudflare Pages.
+
+```bash
+npm run build:web
+npm run serve:web
+```
+
+Deployment, the hand-rolled service worker, and the `public/index.html`
+substitution rules are documented in [docs/deploy-web.md](docs/deploy-web.md).
 
 ## License
 

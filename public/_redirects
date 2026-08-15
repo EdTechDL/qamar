@@ -1,0 +1,7 @@
+# Cloudflare Pages SPA fallback.
+#
+# `web.output` is "single", so the export produces one index.html and
+# expo-router resolves routes client-side. Static assets are matched before
+# redirect rules are evaluated, so this catch-all only fires for real routes
+# like /surahs/2 — it does not shadow /_expo/... or /icon-512.png.
+/*  /index.html  200

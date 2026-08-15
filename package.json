@@ -10,13 +10,17 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "eslint . --ext .ts,.tsx",
+    "lint": "eslint . --ext .ts,.tsx,.mjs,.js",
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "content:build": "ts-node --transpile-only scripts/build-quran-content.ts",
     "content:verify": "ts-node --transpile-only scripts/verify-content.ts",
+    "icons": "node scripts/generate-icons.mjs",
+    "export:web": "expo export --platform web --output-dir dist",
+    "build:web": "npm run export:web && node scripts/build-sw.mjs",
+    "serve:web": "npx --yes serve dist -s -p 4173",
     "format": "prettier --write ."
   },
   "dependencies": {

@@ -1,0 +1,22 @@
+# Cloudflare Pages response headers.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# The worker must never be served stale, or a deploy can't roll forward:
+# the browser would keep revalidating against a cached copy that still
+# points at the previous build's precache manifest.
+/sw.js
+  Cache-Control: no-cache
+
+/manifest.webmanifest
+  Content-Type: application/manifest+json
+  Cache-Control: no-cache
+
+# Metro content-hashes these filenames, so they're safe to pin forever.
+/_expo/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

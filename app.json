@@ -22,6 +22,13 @@
         "backgroundColor": "#F5EAC7"
       }
     },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "lang": "fr",
+      "themeColor": "#F5EAC7",
+      "description": "Application hors-ligne de mémorisation du Coran, pensée pour les profils TDAH."
+    },
     "plugins": [
       "expo-router",
       "expo-font",
