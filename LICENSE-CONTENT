@@ -46,22 +46,43 @@ Retrieved:    TBD
 --------------------------------------------------------------------------
 4. Audio — Qari Recitation
 --------------------------------------------------------------------------
-Status:       DEFERRED (owner note D3, 2026-07-07) — licensing concern.
-              Al-Husary via EveryAyah is the SPEC placeholder; owner is
-              investigating CC-licensed / open-source qari options before
-              v1 ships audio. v1 may ship text-only if no compliant source
-              is available. QariSource interface (src/audio/sources.ts)
-              already isolates the swap.
-Qari:         TBD
-Host:         TBD
-Terms:        TBD (redistribution / hotlinking permissions)
-URL:          TBD
-Retrieved:    TBD
+Status:       PERMITTED USE, NOT A FREE LICENSE (D3, reviewed 2026-08-15).
+              Served from the Al Quran Cloud / Islamic Network CDN, which
+              states the recitations are licensed to them by the reciters
+              or their estates. Copyright remains with the reciters and
+              removal may be requested, so this is documented permission
+              with a takedown clause rather than a closed decision.
+Qari:         Mahmoud Khalil Al-Husary, murattal (edition ar.husary)
+Host:         Al Quran Cloud / Islamic Network
+URL:          https://cdn.islamic.network/quran/audio/128/ar.husary/{n}.mp3
+              ({n} = mushaf position 1..6236)
+Terms:        https://alquran.cloud/terms-and-conditions (section IV)
+              "Recitations are licensed to us by the reciters or their
+              estates for free, non-commercial redistribution at the
+              bitrates we publish. You may stream, embed and download them
+              for personal and educational use. You may bundle them into a
+              commercial product, but please note that copyrights lie with
+              the reciters and they may ask you to remove the conent."
+Retrieved:    2026-08-15
+Conditions:   Do not re-encode or rehost — the grant is scoped to the
+              bitrates the CDN publishes. Attribute the reciter.
 
-Candidate open-source / permissively-licensed avenues to explore:
-- Quran Foundation (Quran.com) audio API — negotiated terms with reciters
-- Volunteer / community recordings released under CC0 or CC-BY
-- Tarteel-hosted recitations (verify per-reciter terms)
+Underlying rights: the Quran text is public domain, but a recording carries
+separate performer and producer rights. Al-Husary died 1980-11-24; Egyptian
+terms likely lapsed, but EU (70 yrs) and US (URAA/MMA) terms may still run.
+Not treated as public domain. Not legal advice.
+
+Previously EveryAyah.com — removed 2026-08-15. It publishes no license for
+the audio at all; its only licensing text covers the separate timing files
+and points at a URL that 404s. The "EveryAyah is CC-BY-NC" claim in
+circulation originates from a third party requesting clarification
+(quran/quran_android#434), not from any rights holder.
+
+Rejected alternatives: Wikimedia Commons (verified licenses, but no complete
+per-ayah mushaf); QUL/Tarteel (licensing varies per resource, none stated for
+the Al-Husary set); Archive.org mirrors (uploader-asserted status only).
+
+See docs/audio-sources.md for the full review.
 
 --------------------------------------------------------------------------
 5. Fonts

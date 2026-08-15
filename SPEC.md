@@ -186,7 +186,7 @@ Same shape as Iqraa: a single Expo (React Native) app, all content bundled as st
 └──────────────────────┬───────────────────────────────┘
                        │ network (audio CDN only, v1)
                        ▼
-            EveryAyah / Quran Foundation CDN
+        Al Quran Cloud / Islamic Network audio CDN
 ```
 
 **Data flow summary**: Screens never touch SQLite directly. Screens → hooks → `hifz-core` pure functions + `db/queries.ts`. `hifz-core` is side-effect-free and receives/returns plain data; persistence is an adapter around it. This keeps the engine unit-testable and reusable (it is also consumed by the owner's separate embeddable tracker project — do not break its public API casually).
@@ -575,7 +575,7 @@ Text is bundled; audio is **streamed then cached, permanently**. After a verse (
 ### 12.2 Source
 
 - **Default qari (v1, single)**: one clear, moderate-paced recitation with per-ayah files. Primary candidate: **Mahmoud Khalil Al-Husary (murattal)** — pedagogically standard for learners; alternates: Muhammad Siddiq Al-Minshawi (murattal), Mishary Alafasy. Final pick is Open Decision D3 (§27).
-- **Hosting**: EveryAyah.com-style per-ayah MP3 layout (`{surah:3}{ayah:3}.mp3`) or the Quran Foundation audio CDN. `src/audio/sources.ts` abstracts the URL scheme behind a `QariSource` interface so adding qaris or swapping CDNs is config, not code. Verify the chosen source's redistribution/hotlinking terms during Phase 1; record in `LICENSE-CONTENT` and `docs/audio-sources.md`.
+- **Hosting**: Al Quran Cloud / Islamic Network CDN, `https://cdn.islamic.network/quran/audio/{bitrate}/{edition}/{n}.mp3`, where `{n}` is mushaf position 1..6236 rather than surah/ayah. `src/audio/sources.ts` abstracts the URL scheme behind a `QariSource` interface so adding qaris or swapping CDNs is config, not code; it derives `{n}` by cumulative sum over `structure.json` and `tests/unit/audio-sources.test.ts` enumerates all 6,236 positions. Terms reviewed and recorded in `LICENSE-CONTENT` and `docs/audio-sources.md` (D3).
 
 ### 12.3 Cache manager (`src/audio/cache.ts`)
 
@@ -889,7 +889,7 @@ The agent must not resolve these silently; open a GitHub issue for each at proje
 
 - **D1 — App name**: **Resolved — Qamar** (2026-07-07).
 - **D2 — Script default**: **Resolved — Imlaei only** (2026-07-07). Uthmani not bundled in v1.
-- **D3 — Qari**: **Deferred** (owner note 2026-07-07): licensing concern flagged. Al-Husary via EveryAyah is the SPEC placeholder pending verification; owner will investigate CC-licensed / open-source qari options before v1 ships audio. Architecture (`QariSource` interface, §12.2) already makes the swap config-only. Until resolved, treat audio features as "must not block ship if source unavailable" — v1 may ship text-only if needed.
+- **D3 — Qari**: **Resolved with a caveat** (2026-08-15). Al-Husary murattal, served from the Al Quran Cloud / Islamic Network CDN (`ar.husary`) — the same project that supplies the bundled text. Their terms §IV state the recitations are licensed to them by the reciters or their estates for free, non-commercial redistribution, and grant downstream "personal and educational use". That is documented permission, **not** a free licence: copyright stays with the reciters and removal may be requested, and we must not re-encode or rehost outside the published bitrates. The previous placeholder (EveryAyah) published no audio licence at all and its one licence link 404s. No complete, verifiably free-licensed per-ayah recitation appears to exist — see `docs/audio-sources.md` for the full review and rejected alternatives.
 - **D4 — French translation edition**: **Resolved — Muhammad Hamidullah** (2026-07-07), via Tanzil redistribution. Exact edition + license text captured during Phase 1 content-pipeline run.
 - **D5 — Tajweed in v1.1**: **Low priority** (owner note 2026-07-07) — worth exploring, not urgent. Run Spike B opportunistically inside Phase 1; if it slips, tajweed simply stays in the v1.1+ backlog. Ship v1 with plain black text + harakat regardless. Reading view remains architected so tajweed is purely additive (§8.3).
 - **D6 — Daily reminder default**: **Resolved — opt-in, off by default** (2026-07-07). Matches §15.4 and §15.8; discoverability handled via a one-time hint in Settings on first Today-screen visit.
