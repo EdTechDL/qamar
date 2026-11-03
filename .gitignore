@@ -61,3 +61,5 @@ Thumbs.db
 expo-env.d.ts
 # @end expo-cli
 .gstack/
+.vercel
+.env*.local
