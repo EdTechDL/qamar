@@ -13,6 +13,7 @@ import { Amiri_400Regular } from '@expo-google-fonts/amiri/400Regular';
 import { Stack } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { UndoToastHost } from '@components/primitives/UndoToast';
 import { light } from '@theme/colors';
 
@@ -35,9 +36,11 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: light.bg }}>
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: light.bg } }} />
-      <UndoToastHost />
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: light.bg }}>
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: light.bg } }} />
+        <UndoToastHost />
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }

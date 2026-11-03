@@ -20,7 +20,7 @@ export function AgingSurahList({ items }: Props) {
   if (items.length === 0) {
     return (
       <View style={styles.emptyCard}>
-        <Text style={styles.emptyLabel}>Aucune sourate à réviser</Text>
+        <Text style={styles.emptyLabel}>No surahs to review</Text>
         <Text style={styles.emptySub}>
           Tout est à jour dans le délai que vous avez configuré.
         </Text>
@@ -46,7 +46,7 @@ export function AgingSurahList({ items }: Props) {
               <View style={styles.rowMain}>
                 <Text style={[styles.name, { color: c.text }]}>{s.name}</Text>
                 <Text style={[styles.sub, { color: c.text }]}>
-                  {s.memorizedCount} verset{s.memorizedCount > 1 ? 's' : ''} · dernière
+                  {s.memorizedCount} ayah{s.memorizedCount > 1 ? 's' : ''} · dernière
                   action il y a {s.daysSince} jour{s.daysSince > 1 ? 's' : ''}
                 </Text>
               </View>

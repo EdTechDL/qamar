@@ -8,9 +8,9 @@ import { useUiStore } from '@stores/ui';
 import { light } from '@theme/colors';
 
 const STATES: Array<{ key: 'none' | 'learning' | 'memorized'; label: string }> = [
-  { key: 'none', label: 'Non commencé' },
-  { key: 'learning', label: 'En cours' },
-  { key: 'memorized', label: 'Mémorisé' },
+  { key: 'none', label: 'Not started' },
+  { key: 'learning', label: 'Learning' },
+  { key: 'memorized', label: 'Memorized' },
 ];
 
 export function RangeStateSheet() {
@@ -27,10 +27,10 @@ export function RangeStateSheet() {
 
   const apply = (target: 'none' | 'learning' | 'memorized') => {
     applyRange(surah, from, to, target);
-    const stateLabel = { none: 'Effacés', learning: 'En cours', memorized: 'Mémorisés' }[target];
+    const stateLabel = { none: 'Cleared', learning: 'Learning', memorized: 'Memorized' }[target];
     showToast({
       message: `${stateLabel} · ${surah}:${from}–${to}`,
-      actionLabel: 'Annuler',
+      actionLabel: 'Undo',
       onAction: () => undo(),
     });
     clear(null);
@@ -48,7 +48,7 @@ export function RangeStateSheet() {
         <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation?.()}>
           <View style={styles.grabber} />
           <Text style={styles.title}>
-            {surah}:{from}–{to} · {count} versets
+            {surah}:{from}–{to} · {count} ayat
           </Text>
           <Text style={styles.subtitle}>Choisissez l'état à appliquer</Text>
 

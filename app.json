@@ -3,7 +3,7 @@
     "name": "Qamar",
     "slug": "qamar",
     "version": "0.0.1",
-    "orientation": "portrait",
+    "orientation": "default",
     "scheme": "qamar",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,7 +14,8 @@
         "UIBackgroundModes": [
           "audio"
         ]
-      }
+      },
+      "requireFullScreen": false
     },
     "android": {
       "package": "app.qamar.hifz",

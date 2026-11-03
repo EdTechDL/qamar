@@ -2,7 +2,7 @@
 // - surah:ayah reference + Arabic text
 // - three-button state segmented control (Non commencé / En cours / Mémorisé)
 // - translation (always shown in the sheet, per §11.4)
-// - "Marquer jusqu'ici…" range shortcut back to the start of the current run
+// - "Mark up to here…" range shortcut back to the start of the current run
 
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -30,9 +30,9 @@ import { light } from '@theme/colors';
 const META = structure as SurahMeta[];
 
 const STATES: Array<{ key: 'none' | 'learning' | 'memorized'; label: string }> = [
-  { key: 'none', label: 'Non commencé' },
-  { key: 'learning', label: 'En cours' },
-  { key: 'memorized', label: 'Mémorisé' },
+  { key: 'none', label: 'Not started' },
+  { key: 'learning', label: 'Learning' },
+  { key: 'memorized', label: 'Memorized' },
 ];
 
 function stateOf(records: ReturnType<typeof useHifzStore.getState>['records'], surah: number, ayah: number): AyahState {
@@ -98,10 +98,10 @@ export function VerseSheet() {
 
   const applyState = (next: 'none' | 'learning' | 'memorized') => {
     setState(openVerse.surah, openVerse.ayah, next);
-    const label = { none: 'Effacé', learning: 'En cours', memorized: 'Mémorisé' }[next];
+    const label = { none: 'Cleared', learning: 'Learning', memorized: 'Memorized' }[next];
     showToast({
       message: `${label} · ${openVerse.surah}:${openVerse.ayah}`,
-      actionLabel: 'Annuler',
+      actionLabel: 'Undo',
       onAction: () => undo(),
     });
   };
@@ -113,7 +113,7 @@ export function VerseSheet() {
     applyRange(openVerse.surah, runStart, openVerse.ayah, target);
     showToast({
       message: `${runStart}–${openVerse.ayah} marqués`,
-      actionLabel: 'Annuler',
+      actionLabel: 'Undo',
       onAction: () => undo(),
     });
     close();
@@ -193,16 +193,16 @@ export function VerseSheet() {
               </Text>
               <Text style={styles.audioLabel}>
                 {loading
-                  ? 'Chargement…'
+                  ? 'Loading…'
                   : isPlaying(openVerse.surah, openVerse.ayah)
-                  ? 'Arrêter'
-                  : 'Écouter'}
+                  ? 'Stop'
+                  : 'Listen'}
               </Text>
             </Pressable>
 
             {frenchText ? (
               <View style={styles.translationCard}>
-                <Text style={styles.translationLabel}>Traduction · Hamidullah</Text>
+                <Text style={styles.translationLabel}>Translation · Hamidullah</Text>
                 <Text style={styles.translation}>{frenchText}</Text>
               </View>
             ) : null}
@@ -210,17 +210,17 @@ export function VerseSheet() {
             <View style={styles.notesSection}>
               <Text style={styles.notesLabel}>Notes</Text>
               {verseNotes.length === 0 && surahNotes.length === 0 ? (
-                <Text style={styles.notesEmpty}>Aucune note</Text>
+                <Text style={styles.notesEmpty}>No notes</Text>
               ) : (
                 <>
                   {[...verseNotes, ...surahNotes].map((n) => {
-                    const scopeLabel = n.scope === 'ayah' ? 'Verset' : 'Sourate';
+                    const scopeLabel = n.scope === 'ayah' ? 'Verse' : 'Surah';
                     const expanded = viewingId === n.id;
                     return (
                       <View key={n.id} style={styles.noteCard}>
                         <View style={styles.noteHeaderRow}>
                           <Text style={styles.noteScope}>
-                            {scopeLabel} · {n.kind === 'canvas' ? 'manuscrit' : 'texte'}
+                            {scopeLabel} · {n.kind === 'canvas' ? 'handwritten' : 'text'}
                           </Text>
                           <Pressable
                             onPress={() => setViewingId(expanded ? null : n.id)}

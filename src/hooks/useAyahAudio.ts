@@ -24,7 +24,7 @@ export function useAyahAudio() {
       setLoading(true);
       try {
         // Route through playRange so the basmalah prefix applies uniformly
-        // to any ayah-1 play (Écouter mode, Détails sheet, header Play).
+        // to any ayah-1 play (Listen mode, Détails sheet, header Play).
         await playRange(surah, ayah, ayah, (v) => {
           if (mounted.current) setPlayingAyah(v);
         });

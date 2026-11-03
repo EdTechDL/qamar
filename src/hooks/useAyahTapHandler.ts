@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { ensureAudioConfigured, playAyah, playRange, stopPlayback } from '@audio/player';
 import structure from '@content/structure.json';
 import type { SurahMeta } from '@content/types';
+import { useActivityStore } from '@stores/activity';
 import { useHifzStore } from '@stores/hifz';
 import { useSessionStore } from '@stores/session';
 import { useUiStore } from '@stores/ui';
@@ -30,12 +31,13 @@ export function useAyahTapHandler() {
   const undo = useHifzStore((s) => s.undo);
   const records = useHifzStore((s) => s.records);
   const showToast = useUiStore((s) => s.showToast);
+  const record = useActivityStore((s) => s.record);
 
   return useCallback(
     (surah: number, ayah: number) => {
       // Playback state overrides toolbar modes ONLY while reading (no
-      // toolbar mode active). In Écouter/Marquer/etc. the mode's behavior
-      // wins so users can e.g. play a single ayah in Écouter without
+      // toolbar mode active). In Listen/Marquer/etc. the mode's behavior
+      // wins so users can e.g. play a single ayah in Listen without
       // subsequent taps kicking off a continuous restart.
       if (mode === 'read' && playingAyah && playingAyah.surah === surah) {
         const surahMeta = META.find((m) => m.id === surah);
@@ -53,10 +55,11 @@ export function useAyahTapHandler() {
         const from: 'none' | 'learning' | 'memorized' = rec?.state ?? 'none';
         const next = CYCLE[from];
         setState(surah, ayah, next);
-        const label = { none: 'Effacé', learning: 'En cours', memorized: 'Mémorisé' }[next];
+        record('ayatMarked');
+        const label = { none: 'Cleared', learning: 'Learning', memorized: 'Memorized' }[next];
         showToast({
           message: `${label} · ${surah}:${ayah}`,
-          actionLabel: 'Annuler',
+          actionLabel: 'Undo',
           onAction: () => undo(),
         });
         return;
@@ -110,6 +113,7 @@ export function useAyahTapHandler() {
       openNoteEditor,
       playingAyah,
       setPlayingAyah,
+      record,
     ],
   );
 }

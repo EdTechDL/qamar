@@ -43,7 +43,7 @@ export default function SurahListScreen() {
           <Text style={styles.back}>‹</Text>
         </Pressable>
         <View style={styles.titles}>
-          <Text style={styles.title}>Sourates</Text>
+          <Text style={styles.title}>Surahs</Text>
           <Text style={styles.subtitle}>
             {overall.memorized.toLocaleString('fr-FR')} / {overall.total.toLocaleString('fr-FR')} mémorisés
           </Text>
@@ -56,7 +56,7 @@ export default function SurahListScreen() {
         <TextInput
           value={query}
           onChangeText={setQuery}
-          placeholder="Rechercher une sourate…"
+          placeholder="Search for a surah…"
           placeholderTextColor={light.textMuted}
           style={styles.searchInput}
           autoCorrect={false}
@@ -97,7 +97,7 @@ export default function SurahListScreen() {
                   </View>
                   <View style={styles.rowMidLine}>
                     <Text style={styles.arabic}>{item.nameArabic}</Text>
-                    <Text style={styles.place}>{item.revelationPlace === 'makkah' ? 'Mecquoise' : 'Médinoise'}</Text>
+                    <Text style={styles.place}>{item.revelationPlace === 'makkah' ? 'Meccan' : 'Medinan'}</Text>
                   </View>
                   <SurahProgressBar
                     memorized={counts.memorized}

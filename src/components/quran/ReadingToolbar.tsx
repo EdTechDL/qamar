@@ -13,11 +13,11 @@ interface ModeDef {
 }
 
 const MODES: readonly ModeDef[] = [
-  { key: 'mark', label: 'Marquer', glyph: '●' },
-  { key: 'range', label: 'Sélection', glyph: '⇥' },
+  { key: 'mark', label: 'Mark', glyph: '●' },
+  { key: 'range', label: 'Select', glyph: '⇥' },
   { key: 'notes', label: 'Notes', glyph: '✎' },
-  { key: 'listen', label: 'Écouter', glyph: '▶' },
-  { key: 'details', label: 'Détails', glyph: 'ⓘ' },
+  { key: 'listen', label: 'Listen', glyph: '▶' },
+  { key: 'details', label: 'Details', glyph: 'ⓘ' },
 ];
 
 export function ReadingToolbar() {
@@ -26,14 +26,14 @@ export function ReadingToolbar() {
   const rangeAnchor = useSessionStore((s) => s.rangeAnchor);
 
   const instruction = (() => {
-    if (mode === 'details') return 'Touchez un verset pour voir ses détails.';
-    if (mode === 'mark') return 'Touchez un verset pour cycler son état.';
+    if (mode === 'details') return 'Tap a verse to see its details.';
+    if (mode === 'mark') return 'Tap a verse to cycle its state.';
     if (mode === 'range')
       return rangeAnchor
         ? `Ancre: ${rangeAnchor.surah}:${rangeAnchor.ayah} — touchez la fin.`
-        : 'Touchez le premier verset de la sélection.';
-    if (mode === 'notes') return 'Touchez un verset pour ouvrir sa note.';
-    if (mode === 'listen') return 'Touchez un verset pour l\'écouter.';
+        : 'Tap the first verse of your selection.';
+    if (mode === 'notes') return 'Tap a verse to open its note.';
+    if (mode === 'listen') return 'Tap a verse to listen to it.';
     return null;
   })();
 

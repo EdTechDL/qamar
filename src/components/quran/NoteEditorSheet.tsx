@@ -115,7 +115,7 @@ export function NoteEditorSheet() {
     const preview =
       note.kind === 'text'
         ? note.body.slice(0, 40) + (note.body.length > 40 ? '…' : '')
-        : 'manuscrit';
+        : 'handwritten';
     showToast({
       message: `Note supprimée · ${preview}`,
       actionLabel: 'Annuler',
@@ -174,8 +174,8 @@ export function NoteEditorSheet() {
               {notes.length === 0 ? (
                 <Text style={styles.empty}>
                   {isSurahScope
-                    ? 'Aucune note pour cette sourate.'
-                    : 'Aucune note pour ce verset.'}
+                    ? 'No notes pour cette sourate.'
+                    : 'No notes pour ce ayah.'}
                 </Text>
               ) : (
                 notes.map((n) => (
@@ -194,7 +194,7 @@ export function NoteEditorSheet() {
                             multiline
                             maxLength={MAX_TEXT_BODY}
                             style={styles.input}
-                            placeholder="Modifier la note…"
+                            placeholder="Edit la note…"
                             placeholderTextColor={light.textMuted}
                           />
                           <View style={styles.actionsRow}>
@@ -260,7 +260,7 @@ export function NoteEditorSheet() {
                             )}
                           </Pressable>
                           <Pressable onPress={() => startEdit(n)} hitSlop={8}>
-                            <Text style={styles.action}>Modifier</Text>
+                            <Text style={styles.action}>Edit</Text>
                           </Pressable>
                         </View>
                       </>

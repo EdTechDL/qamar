@@ -8,6 +8,7 @@ import { useHifzStore } from '@stores/hifz';
 import { useNotesStore } from '@stores/notes';
 import { useSessionStore } from '@stores/session';
 import { light } from '@theme/colors';
+import { arabicLineHeight, typography } from '@theme/typography';
 import type { AyahState } from '@core/hifz';
 
 interface Ayah {
@@ -56,7 +57,7 @@ const NO_SELECT = {
 export const ContinuousPage = memo(function ContinuousPage({
   surah,
   ayat,
-  fontSize = 28,
+  fontSize = typography.arabic.defaultSize,
   onTap,
 }: Props) {
   const records = useHifzStore((s) => s.records);
@@ -86,7 +87,7 @@ export const ContinuousPage = memo(function ContinuousPage({
     <View style={styles.page}>
       <Text
         selectable={false}
-        style={[styles.arabic, NO_SELECT, { fontSize, lineHeight: Math.round(fontSize * 1.95) }] as any}
+        style={[styles.arabic, NO_SELECT, { fontSize, lineHeight: arabicLineHeight(fontSize) }] as any}
       >
         {ayat.map((a) => {
           const state = stateBySeq.get(a.ayah) ?? 'none';

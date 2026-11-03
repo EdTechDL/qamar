@@ -8,6 +8,7 @@ import { useHifzStore } from '@stores/hifz';
 import { useNotesStore } from '@stores/notes';
 import { useSessionStore } from '@stores/session';
 import { light } from '@theme/colors';
+import { arabicLineHeight, typography } from '@theme/typography';
 import type { AyahState } from '@core/hifz';
 
 interface Props {
@@ -31,7 +32,7 @@ export const AyahBlock = memo(function AyahBlock({
   text,
   frenchText,
   showFrench,
-  fontSize = 28,
+  fontSize = typography.arabic.defaultSize,
   onTap,
 }: Props) {
   const state = useHifzStore((s) => stateOf(s.records, surah, ayah));
@@ -58,7 +59,7 @@ export const AyahBlock = memo(function AyahBlock({
             <Text style={styles.badgeText}>↻</Text>
           </View>
         )}
-        <Text style={[styles.arabic, { fontSize, lineHeight: Math.round(fontSize * 1.85) }]}>
+        <Text style={[styles.arabic, { fontSize, lineHeight: arabicLineHeight(fontSize) }]}>
           {text}{' '}
           {hasNote && <Text style={styles.noteGlyph}>✎ </Text>}
           <Text style={styles.marker}>﴿{ayah}﴾</Text>

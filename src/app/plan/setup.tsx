@@ -19,17 +19,17 @@ import { light } from '@theme/colors';
 type Step = 0 | 1 | 2 | 3;
 
 const GOAL_CHOICES: { key: Exclude<Goal, 'custom'>; label: string; desc: string }[] = [
-  { key: 'juz-amma', label: "Juz 'Amma", desc: 'Sourates 78 à 114 · ~564 versets' },
-  { key: 'last-two-juz', label: 'Les deux derniers Juz', desc: 'Juz 29 et 30' },
-  { key: 'half', label: 'La moitié du Coran', desc: '~3118 versets' },
-  { key: 'full', label: 'Le Coran entier', desc: '6236 versets' },
+  { key: 'juz-amma', label: "Juz 'Amma", desc: 'Surahs 78 to 114 · ~564 ayat' },
+  { key: 'last-two-juz', label: 'The last two Juz', desc: 'Juz 29 and 30' },
+  { key: 'half', label: 'Half the Quran', desc: '~3118 ayat' },
+  { key: 'full', label: 'Le Coran entier', desc: '6236 ayat' },
 ];
 
 const TIME_CHOICES: { key: SessionMinutes; label: string; desc: string }[] = [
-  { key: 5, label: '5 min', desc: '~1 verset par session' },
-  { key: 15, label: '15 min', desc: '~2 versets par session' },
-  { key: 30, label: '30 min', desc: '~4 versets par session' },
-  { key: 60, label: '60 min', desc: '~8 versets par session' },
+  { key: 5, label: '5 min', desc: '~1 ayah par session' },
+  { key: 15, label: '15 min', desc: '~2 ayat par session' },
+  { key: 30, label: '30 min', desc: '~4 ayat par session' },
+  { key: 60, label: '60 min', desc: '~8 ayat par session' },
 ];
 
 const CADENCE_CHOICES: { key: Cadence; label: string; desc: string }[] = [
@@ -94,7 +94,7 @@ export default function PlanSetupScreen() {
           <QuestionCard
             index={1}
             question="Quel est votre objectif ?"
-            help="Combien souhaitez-vous mémoriser au total ?"
+            help='How much do you want to memorize in total?'
           >
             {GOAL_CHOICES.map((c) => (
               <Choice
@@ -115,7 +115,7 @@ export default function PlanSetupScreen() {
           <QuestionCard
             index={2}
             question="Combien de temps par session ?"
-            help="On estime la moitié du temps pour réviser les anciennes portions."
+            help='We budget half your time for revising older portions.'
           >
             {TIME_CHOICES.map((c) => (
               <Choice
@@ -135,8 +135,8 @@ export default function PlanSetupScreen() {
         {step === 2 && (
           <QuestionCard
             index={3}
-            question="À quelle fréquence ?"
-            help="On adapte l'objectif hebdomadaire à votre rythme réel."
+            question='How often?'
+            help='The weekly target adapts to your real pace.'
           >
             {CADENCE_CHOICES.map((c) => (
               <Choice
@@ -161,7 +161,7 @@ export default function PlanSetupScreen() {
                 {GOAL_LABEL[preview.plan.goal]}
               </Text>
               <Text style={styles.summaryTag}>
-                {preview.plan.goalAyahCount} versets
+                {preview.plan.goalAyahCount} ayat
               </Text>
             </View>
             <View style={styles.summaryRow}>

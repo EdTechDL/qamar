@@ -1,4 +1,4 @@
-// Home 'Planification' card. Shows the active plan's daily target + weekly
+// Home 'Planning' card. Shows the active plan's daily target + weekly
 // progress + rolling ETA; falls back to a CTA when no plan is set.
 
 import { Link } from 'expo-router';
@@ -28,15 +28,15 @@ export function PlanCard() {
         <Pressable style={styles.emptyCard}>
           <View style={styles.head}>
             <Sparkles size={16} color={light.accentSecondary} />
-            <Text style={styles.emptyLabel}>Planification</Text>
+            <Text style={styles.emptyLabel}>Planning</Text>
           </View>
-          <Text style={styles.emptyTitle}>Configurer mon plan</Text>
+          <Text style={styles.emptyTitle}>Set up my plan</Text>
           <Text style={styles.emptyBody}>
             Trois questions et vous avez une cadence, un objectif hebdomadaire et
             une estimation de temps qui s'ajuste.
           </Text>
           <View style={styles.cardFoot}>
-            <Text style={styles.cta}>Commencer</Text>
+            <Text style={styles.cta}>Start</Text>
             <ArrowRight size={14} color={light.accent} />
           </View>
         </Pressable>
@@ -63,12 +63,12 @@ export function PlanCard() {
 
       <View style={styles.metricRow}>
         <View style={styles.metricCell}>
-          <Text style={styles.metricLabel}>Aujourd'hui</Text>
+          <Text style={styles.metricLabel}>Today</Text>
           <Text style={styles.metricValue}>{plan.versesPerSession}</Text>
-          <Text style={styles.metricSub}>versets</Text>
+          <Text style={styles.metricSub}>ayat</Text>
         </View>
         <View style={styles.metricCell}>
-          <Text style={styles.metricLabel}>Cette semaine</Text>
+          <Text style={styles.metricLabel}>This week</Text>
           <Text style={styles.metricValue}>
             {progress.memorizedThisWeek}
             <Text style={styles.metricValueMuted}> / {plan.targetVersesPerWeek}</Text>
@@ -82,7 +82,7 @@ export function PlanCard() {
       </View>
 
       <View style={styles.etaRow}>
-        <Text style={styles.etaLabel}>Fin estimée</Text>
+        <Text style={styles.etaLabel}>Estimated finish</Text>
         <Text style={styles.etaValue}>
           {formatDate(progress.actualEta ?? progress.targetEta)}
         </Text>
@@ -98,11 +98,11 @@ export function PlanCard() {
       <View style={styles.footerRow}>
         <Link href="/plan/setup" asChild>
           <Pressable hitSlop={6}>
-            <Text style={styles.footerLink}>Modifier</Text>
+            <Text style={styles.footerLink}>Edit</Text>
           </Pressable>
         </Link>
         <Pressable onPress={() => clearPlan()} hitSlop={6}>
-          <Text style={styles.footerLinkMuted}>Réinitialiser</Text>
+          <Text style={styles.footerLinkMuted}>Reset</Text>
         </Pressable>
       </View>
     </View>

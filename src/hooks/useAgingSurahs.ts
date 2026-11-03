@@ -1,4 +1,4 @@
-// Home 'À réviser' feed: surahs whose most recent memorization is older than
+// Home 'To review' feed: surahs whose most recent memorization is older than
 // the reminder baseline. Sorted oldest-first.
 
 import { useMemo } from 'react';

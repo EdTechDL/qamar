@@ -124,3 +124,37 @@ can't tree-shake a `require()` of a binary asset — importing from the root cos
   public deploy serves those URLs to real visitors.
 - No offline indicator in the UI. Cached audio replays silently; uncached audio
   simply fails.
+
+---
+
+## Deploying to Vercel
+
+`vercel.json` at the repo root carries the whole configuration, so the Vercel
+dashboard needs no build settings entered by hand:
+
+| Setting | Source |
+| --- | --- |
+| Framework preset | `"framework": null` — without it Vercel guesses Next.js and runs `next build` |
+| Build command | `npm run build:web` |
+| Output directory | `dist` |
+| Node version | `.node-version` |
+
+Cloudflare's `public/_headers` and `public/_redirects` are inert on Vercel, so
+their rules are restated in `vercel.json`:
+
+* the SPA fallback becomes a `rewrites` entry. Vercel checks the filesystem
+  before applying rewrites, so real files still win; the negative lookahead on
+  `_expo/` is belt-and-braces for the hashed bundle directory.
+* `/sw.js` and `/manifest.webmanifest` are served `no-cache`, and the
+  content-hashed `_expo/*` and `assets/*` trees are pinned immutable.
+
+Both files are kept in `public/` so a Cloudflare deploy still works unchanged.
+
+### First deploy
+
+```bash
+vercel link        # once, to EdTechDL's project
+vercel --prod
+```
+
+Afterwards, pushes to the connected branch deploy automatically.

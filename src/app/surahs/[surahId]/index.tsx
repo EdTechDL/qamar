@@ -21,9 +21,11 @@ import { loadSurah as loadFrench } from '@content/translation-fr';
 import type { AyahIndex, AyahText, SurahMeta } from '@content/types';
 import { keyOf } from '@core/hifz';
 import { useNotesStore } from '@stores/notes';
+import { useSettingsStore } from '@stores/settings';
 import { useSessionStore } from '@stores/session';
 import { useAyahTapHandler } from '../../../hooks/useAyahTapHandler';
 import { light } from '@theme/colors';
+import { arabicSize } from '@theme/typography';
 
 const meta = structure as SurahMeta[];
 const IDX = ayahIndexJson as AyahIndex;
@@ -53,6 +55,8 @@ export default function ReadingViewScreen() {
   const setPlayingAyah = useSessionStore((s) => s.setPlayingAyah);
   const setReadingMode = useSessionStore((s) => s.setReadingMode);
   const playingAyah = useSessionStore((s) => s.playingAyah);
+  const fontScale = useSettingsStore((s) => s.fontScale);
+  const readingFontSize = arabicSize(fontScale);
   const surahNoteCount = useNotesStore((s) =>
     s.notes.reduce((n, note) => (note.scope === 'surah' && note.surah === id ? n + 1 : n), 0),
   );
@@ -121,7 +125,7 @@ export default function ReadingViewScreen() {
   if (!surahMeta) {
     return (
       <View style={styles.center}>
-        <Text style={styles.notFound}>Sourate introuvable</Text>
+        <Text style={styles.notFound}>Surah introuvable</Text>
       </View>
     );
   }
@@ -135,7 +139,7 @@ export default function ReadingViewScreen() {
         <View style={styles.headerTitles}>
           <Text style={styles.arabicName}>{surahMeta.nameArabic}</Text>
           <Text style={styles.frenchName}>
-            {surahMeta.nameTransliterated} · {surahMeta.ayahCount} versets
+            {surahMeta.nameTransliterated} · {surahMeta.ayahCount} ayat
           </Text>
         </View>
         <Pressable
@@ -145,7 +149,7 @@ export default function ReadingViewScreen() {
           }}
           hitSlop={12}
           style={styles.playBtn}
-          accessibilityLabel={isPlayingSurah ? 'Arrêter la lecture' : 'Lecture continue'}
+          accessibilityLabel={isPlayingSurah ? 'Stop playback' : 'Lecture continue'}
         >
           {isPlayingSurah ? (
             <Square size={18} color={light.state.playingMarker} fill={light.state.playingMarker} />
@@ -185,6 +189,7 @@ export default function ReadingViewScreen() {
               text={item.text}
               frenchText={item.french}
               showFrench
+              fontSize={readingFontSize}
               onTap={onTap}
             />
           )}
@@ -195,7 +200,12 @@ export default function ReadingViewScreen() {
           keyExtractor={(item) => `p${item.page}`}
           contentContainerStyle={{ padding: 20, paddingBottom: 96 }}
           renderItem={({ item }) => (
-            <ContinuousPage surah={id} ayat={item.ayat} onTap={onTap} />
+            <ContinuousPage
+              surah={id}
+              ayat={item.ayat}
+              fontSize={readingFontSize}
+              onTap={onTap}
+            />
           )}
         />
       )}

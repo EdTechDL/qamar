@@ -1,5 +1,5 @@
 // Review session player. SPEC §14.4.
-// Presents due chunks one at a time. Two big buttons: Récité ✓ / Difficile.
+// Presents due chunks one at a time. Two big buttons: Recited ✓ / Hard.
 // Session end: celebration + back to Today.
 
 import { useRouter } from 'expo-router';
@@ -39,10 +39,10 @@ export default function ReviewScreen() {
       <View style={styles.host}>
         <View style={styles.empty}>
           <Text style={styles.emptyGlyph}>·</Text>
-          <Text style={styles.emptyTitle}>Rien à réviser aujourd'hui</Text>
-          <Text style={styles.emptySub}>Reviens un peu plus tard.</Text>
+          <Text style={styles.emptyTitle}>Nothing to review today</Text>
+          <Text style={styles.emptySub}>Check back a little later.</Text>
           <Pressable onPress={() => router.replace('/')} style={styles.homeBtn}>
-            <Text style={styles.homeBtnLabel}>Retour</Text>
+            <Text style={styles.homeBtnLabel}>Back</Text>
           </Pressable>
         </View>
       </View>
@@ -54,13 +54,13 @@ export default function ReviewScreen() {
       <View style={styles.host}>
         <View style={styles.empty}>
           <Text style={styles.doneGlyph}>✓</Text>
-          <Text style={styles.emptyTitle}>Bien joué</Text>
+          <Text style={styles.emptyTitle}>Well done</Text>
           <Text style={styles.emptySub}>
             {initialQueue.length} révision{initialQueue.length > 1 ? 's' : ''} terminée
             {initialQueue.length > 1 ? 's' : ''}.
           </Text>
           <Pressable onPress={() => router.replace('/')} style={styles.homeBtn}>
-            <Text style={styles.homeBtnLabel}>Retour</Text>
+            <Text style={styles.homeBtnLabel}>Back</Text>
           </Pressable>
         </View>
       </View>
@@ -93,20 +93,20 @@ export default function ReviewScreen() {
 
       <View style={styles.body}>
         <Loader size={20} color={light.accentSecondary} />
-        <Text style={styles.chunkLabel}>Réviser</Text>
+        <Text style={styles.chunkLabel}>Review</Text>
         <Text style={styles.chunkTitle}>{label}</Text>
         <Text style={styles.chunkSub}>
-          {size} verset{size > 1 ? 's' : ''}
+          {size} ayah{size > 1 ? 's' : ''}
         </Text>
       </View>
 
       <View style={styles.buttons}>
         <Pressable style={styles.btnHard} onPress={() => advance('hard')}>
-          <Text style={styles.btnHardLabel}>Difficile</Text>
+          <Text style={styles.btnHardLabel}>Hard</Text>
         </Pressable>
         <Pressable style={styles.btnOk} onPress={() => advance('ok')}>
           <Check size={18} color="#FFFFFF" />
-          <Text style={styles.btnOkLabel}>Récité</Text>
+          <Text style={styles.btnOkLabel}>Recited</Text>
         </Pressable>
       </View>
     </View>

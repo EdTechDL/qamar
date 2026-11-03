@@ -18,6 +18,12 @@ export interface ReminderConfig {
 interface SettingsState {
   dailyBudget: number; // SPEC §14.3 — kept for chunk-scheduler consumers
   setDailyBudget: (n: number) => void;
+  /** Multiplier applied to the Arabic reading size. See @theme/typography. */
+  fontScale: number;
+  setFontScale: (n: number) => void;
+  /** Show the French translation inline under each ayah. */
+  showTranslation: boolean;
+  setShowTranslation: (v: boolean) => void;
   features: FeatureFlags;
   setFeature: (key: keyof FeatureFlags, value: boolean) => void;
   reminder: ReminderConfig;
@@ -29,6 +35,10 @@ export const useSettingsStore = create<SettingsState>()(
     (set) => ({
       dailyBudget: 3,
       setDailyBudget: (n) => set({ dailyBudget: Math.max(1, Math.floor(n)) }),
+      fontScale: 1.15,
+      setFontScale: (n) => set({ fontScale: Math.max(0.5, Math.min(2, n)) }),
+      showTranslation: false,
+      setShowTranslation: (v) => set({ showTranslation: v }),
       // Free mode is the default — every guided feature is opt-in.
       features: { revisionReminder: false, assistedPlanning: false },
       setFeature: (key, value) =>

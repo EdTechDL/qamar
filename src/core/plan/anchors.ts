@@ -46,10 +46,10 @@ export function goalAyahCountFor(goal: Exclude<Goal, 'custom'>): number {
 // Convenience for the wizard's confirmation screen.
 export const GOAL_LABEL: Record<Goal, string> = {
   'juz-amma': "Juz 'Amma",
-  'last-two-juz': 'Les deux derniers Juz',
-  half: 'La moitié du Coran',
+  'last-two-juz': 'The last two Juz',
+  half: 'Half the Quran',
   full: 'Le Coran entier',
-  custom: 'Personnalisé',
+  custom: 'Custom',
 };
 
 // Compose the plan-creation snapshot for a preset goal, ready for the store.
