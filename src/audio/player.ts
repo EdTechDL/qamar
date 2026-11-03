@@ -24,13 +24,13 @@ export interface PlayHandle {
 export async function playAyah(
   surah: number,
   ayah: number,
-  opts: { rate?: number; onFinished?: () => void } = {},
+  opts: { rate?: number; qariId?: string; onFinished?: () => void } = {},
 ): Promise<PlayHandle> {
   const gen = ++generation;
   await unloadCurrent();
   if (gen !== generation) return { stop: async () => {} };
 
-  const uri = await resolveAudioUri(surah, ayah);
+  const uri = await resolveAudioUri(surah, ayah, opts.qariId);
   if (gen !== generation) return { stop: async () => {} };
 
   const { sound } = await Audio.Sound.createAsync(
@@ -88,7 +88,7 @@ export async function playRange(
   fromAyah: number,
   toAyah: number,
   onAyahChange: (v: { surah: number; ayah: number } | null) => void,
-  opts: { rate?: number } = {},
+  opts: { rate?: number; qariId?: string } = {},
 ): Promise<{ stop: () => Promise<void> }> {
   const gen = ++sequenceGen;
 
@@ -101,6 +101,7 @@ export async function playRange(
     onAyahChange({ surah, ayah });
     await playAyah(surah, ayah, {
       rate: opts.rate,
+      qariId: opts.qariId,
       onFinished: () => {
         void playNext(ayah + 1);
       },
@@ -112,6 +113,7 @@ export async function playRange(
     onAyahChange({ surah, ayah: 1 });
     await playAyah(BASMALAH_SURAH, BASMALAH_AYAH, {
       rate: opts.rate,
+      qariId: opts.qariId,
       onFinished: () => {
         void playNext(fromAyah);
       },

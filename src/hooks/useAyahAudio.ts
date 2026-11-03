@@ -5,12 +5,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ensureAudioConfigured, playRange, stopPlayback } from '@audio/player';
 import { useSessionStore } from '@stores/session';
+import { useAudioPrefsStore } from '@stores/audioPrefs';
 
 export function useAyahAudio() {
   const [loading, setLoading] = useState(false);
   const mounted = useRef(true);
   const setPlayingAyah = useSessionStore((s) => s.setPlayingAyah);
   const playingAyah = useSessionStore((s) => s.playingAyah);
+  const qariId = useAudioPrefsStore((s) => s.qariId);
 
   useEffect(() => {
     void ensureAudioConfigured();
@@ -25,14 +27,20 @@ export function useAyahAudio() {
       try {
         // Route through playRange so the basmalah prefix applies uniformly
         // to any ayah-1 play (Listen mode, Détails sheet, header Play).
-        await playRange(surah, ayah, ayah, (v) => {
-          if (mounted.current) setPlayingAyah(v);
-        });
+        await playRange(
+          surah,
+          ayah,
+          ayah,
+          (v) => {
+            if (mounted.current) setPlayingAyah(v);
+          },
+          { qariId },
+        );
       } finally {
         if (mounted.current) setLoading(false);
       }
     },
-    [setPlayingAyah],
+    [setPlayingAyah, qariId],
   );
 
   const stop = useCallback(async () => {

@@ -17,6 +17,7 @@ import {
 } from '@stores/settings';
 import { useActivityStore } from '@stores/activity';
 import { RepeatControls } from '@components/audio/RepeatControls';
+import { QariPicker } from '@components/audio/QariPicker';
 import { light } from '@theme/colors';
 import { FONT_SCALES, FONT_SCALE_LABELS, arabicSize } from '@theme/typography';
 
@@ -107,6 +108,11 @@ export default function SettingsScreen() {
               );
             })}
           </View>
+        </View>
+
+        <Text style={styles.sectionLabel}>Reciter</Text>
+        <View style={styles.card}>
+          <QariPicker />
         </View>
 
         <Text style={styles.sectionLabel}>Repeat defaults</Text>

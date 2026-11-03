@@ -6,13 +6,16 @@ import { View } from 'react-native';
 import { BrowseRow } from '@components/browse/BrowseRow';
 import { Screen } from '@components/primitives/Screen';
 import { combinedProgress, maqraProgress, maqraRangeLabel, maqrasInHizb } from '@core/maqra';
+import { maqraMistakeCount } from '@core/mistakes';
 import { useHifzStore } from '@stores/hifz';
+import { useMistakesStore } from '@stores/mistakes';
 
 export default function HizbDetailScreen() {
   const router = useRouter();
   const { hizbId } = useLocalSearchParams<{ hizbId: string }>();
   const hizb = Number(hizbId) || 1;
   const records = useHifzStore((s) => s.records);
+  const marks = useMistakesStore((s) => s.marks);
 
   const { maqras, overall } = useMemo(() => {
     const list = maqrasInHizb(hizb);
@@ -38,6 +41,7 @@ export default function HizbDetailScreen() {
               percent={p.percent}
               learningPercent={(p.learning / p.total) * 100}
               meta={`${p.memorized} / ${p.total}`}
+              mistakes={maqraMistakeCount(marks, maqra)}
               onPress={() => router.push(`/browse/maqra/${maqra.id}` as never)}
             />
           );

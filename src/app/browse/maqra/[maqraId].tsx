@@ -1,16 +1,20 @@
-// Maqra review session — the repeat-listening workflow.
+// Maqra review session — the repeat-listening workflow, plus the mistake
+// highlighter used while reciting to a teacher.
 //
 // Loads a rub' al-hizb (possibly spanning two surahs), plays it with the
 // user's repeat settings, highlights the ayah being recited, and offers the
 // two range actions that matter: mark the whole portion memorized, or mark it
-// reviewed today.
+// reviewed today. Switching to Mark mistakes turns the text into a finger
+// highlighter whose marks persist until the user clears them.
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Pause, Play } from 'lucide-react-native';
+import { Highlighter, Pause, Play } from 'lucide-react-native';
 import { RepeatControls } from '@components/audio/RepeatControls';
+import { HighlightableAyah, type Selection } from '@components/mistakes/HighlightableAyah';
+import { MistakeDock } from '@components/mistakes/MistakeDock';
 import { ProgressBar } from '@components/primitives/ProgressBar';
 import { MAX_CONTENT_WIDTH } from '@components/primitives/Screen';
 import { loadSurah } from '@content/text';
@@ -22,12 +26,15 @@ import {
   maqraRangeLabel,
   surahName,
 } from '@core/maqra';
+import { expandToWord, marksForAyah, segmentArabic, sliceClusters } from '@core/mistakes';
 import { useMaqraPlayer } from '../../../hooks/useMaqraPlayer';
 import { useActivityStore } from '@stores/activity';
 import { useHifzStore } from '@stores/hifz';
+import { useMistakesStore } from '@stores/mistakes';
 import { useSettingsStore } from '@stores/settings';
+import { useUiStore } from '@stores/ui';
 import { light } from '@theme/colors';
-import { arabicLineHeight, arabicSize } from '@theme/typography';
+import { arabicSize } from '@theme/typography';
 
 export default function MaqraSessionScreen() {
   const router = useRouter();
@@ -39,7 +46,16 @@ export default function MaqraSessionScreen() {
   const applyRange = useHifzStore((s) => s.applyRange);
   const record = useActivityStore((s) => s.record);
   const fontScale = useSettingsStore((s) => s.fontScale);
+  const allMarks = useMistakesStore((s) => s.marks);
+  const addMark = useMistakesStore((s) => s.addMark);
+  const removeMark = useMistakesStore((s) => s.removeMark);
+  const restoreLastRemoved = useMistakesStore((s) => s.restoreLastRemoved);
+  const showToast = useUiStore((s) => s.showToast);
   const { playing, progress, playMaqra, stop } = useMaqraPlayer();
+
+  const [marking, setMarking] = useState(false);
+  const [target, setTarget] = useState<{ surah: number; ayah: number } | null>(null);
+  const [selection, setSelection] = useState<Selection | null>(null);
 
   const size = arabicSize(fontScale);
 
@@ -79,6 +95,52 @@ export default function MaqraSessionScreen() {
   };
 
   const currentKey = progress ? `${progress.surah}:${progress.ayah}` : null;
+
+  const targetText = target
+    ? (ayat.find((a) => a.surah === target.surah && a.ayah === target.ayah)?.text ?? '')
+    : '';
+  const targetClusters = targetText ? segmentArabic(targetText) : [];
+  const excerpt =
+    selection && targetClusters.length
+      ? sliceClusters(targetClusters, selection.from, selection.to)
+      : '';
+
+  const beginSelection = (surah: number, ayah: number, sel: Selection | null) => {
+    setTarget(sel ? { surah, ayah } : null);
+    setSelection(sel);
+  };
+
+  const saveMark = () => {
+    if (!target || !selection) return;
+    addMark({
+      surah: target.surah,
+      ayah: target.ayah,
+      from: selection.from,
+      to: selection.to,
+      excerpt,
+    });
+    setSelection(null);
+    setTarget(null);
+  };
+
+  const expandSelection = () => {
+    if (!selection || targetClusters.length === 0) return;
+    setSelection(expandToWord(targetClusters, selection.from, selection.to));
+  };
+
+  const dropMark = (id: string, text: string) => {
+    removeMark(id);
+    showToast({
+      message: `Mistake cleared · ${text}`,
+      actionLabel: 'Undo',
+      onAction: () => restoreLastRemoved(),
+    });
+  };
+
+  const maqraMarkCount = ayat.reduce(
+    (n, a) => n + marksForAyah(allMarks, a.surah, a.ayah).length,
+    0,
+  );
 
   return (
     <View style={[styles.host, { paddingTop: insets.top + 8 }]}>
@@ -134,26 +196,53 @@ export default function MaqraSessionScreen() {
             ) : null}
           </View>
 
-          <RepeatControls />
+          {!marking && <RepeatControls />}
+
+          <Pressable
+            onPress={() => {
+              setMarking((v) => !v);
+              setSelection(null);
+              setTarget(null);
+              if (!marking) void stop();
+            }}
+            style={[styles.markToggle, marking && styles.markToggleActive]}
+            accessibilityRole="switch"
+            accessibilityState={{ checked: marking }}
+          >
+            <Highlighter size={16} color={marking ? '#FFFFFF' : light.text} />
+            <Text style={[styles.markToggleText, marking && styles.markToggleTextActive]}>
+              {marking ? 'Done marking' : 'Mark mistakes'}
+            </Text>
+            {maqraMarkCount > 0 && !marking ? (
+              <View style={styles.markCount}>
+                <Text style={styles.markCountText}>{maqraMarkCount}</Text>
+              </View>
+            ) : null}
+          </Pressable>
 
           <View style={styles.ayatBlock}>
             {ayat.map(({ surah, ayah, text }, i) => {
               const key = `${surah}:${ayah}`;
               const isCurrent = key === currentKey;
               const startsNewSurah = i === 0 || ayat[i - 1]!.surah !== surah;
+              const ayahMarks = marksForAyah(allMarks, surah, ayah);
+              const isTarget = target?.surah === surah && target?.ayah === ayah;
               return (
                 <View key={key}>
                   {startsNewSurah && <Text style={styles.surahDivider}>{surahName(surah)}</Text>}
-                  <View style={[styles.ayahRow, isCurrent && styles.ayahRowActive]}>
-                    <Text
-                      style={[
-                        styles.arabic,
-                        { fontSize: size, lineHeight: arabicLineHeight(size) },
-                      ]}
-                    >
-                      {text}
-                      <Text style={styles.marker}> ۝{toArabicDigits(ayah)} </Text>
-                    </Text>
+                  <View style={styles.ayahRow}>
+                    <HighlightableAyah
+                      ayahKey={key}
+                      text={text}
+                      fontSize={size}
+                      marks={ayahMarks}
+                      editing={marking}
+                      playing={isCurrent && !marking}
+                      selection={isTarget ? selection : null}
+                      onSelectionChange={(sel) => beginSelection(surah, ayah, sel)}
+                      onMarkPress={(m) => dropMark(m.id, m.excerpt || text.slice(0, 12))}
+                      suffix={` ۝${toArabicDigits(ayah)} `}
+                    />
                   </View>
                 </View>
               );
@@ -175,15 +264,31 @@ export default function MaqraSessionScreen() {
       </ScrollView>
 
       <View style={[styles.dock, { paddingBottom: insets.bottom + 14 }]}>
-        <Pressable
-          onPress={() => (playing ? void stop() : void playMaqra(maqra))}
-          style={styles.playBtn}
-          accessibilityRole="button"
-          accessibilityLabel={playing ? 'Stop' : 'Play this maqra'}
-        >
-          {playing ? <Pause size={20} color="#FFFFFF" /> : <Play size={20} color="#FFFFFF" />}
-          <Text style={styles.playLabel}>{playing ? 'Stop' : `Play ${maqra.ayahCount} ayat`}</Text>
-        </Pressable>
+        {marking ? (
+          <MistakeDock
+            excerpt={excerpt}
+            canSave={selection !== null}
+            onSave={saveMark}
+            onExpandWord={expandSelection}
+            onCancel={() => {
+              setSelection(null);
+              setTarget(null);
+            }}
+            hint="Drag across the text, or tap a highlight to clear it"
+          />
+        ) : (
+          <Pressable
+            onPress={() => (playing ? void stop() : void playMaqra(maqra))}
+            style={styles.playBtn}
+            accessibilityRole="button"
+            accessibilityLabel={playing ? 'Stop' : 'Play this maqra'}
+          >
+            {playing ? <Pause size={20} color="#FFFFFF" /> : <Play size={20} color="#FFFFFF" />}
+            <Text style={styles.playLabel}>
+              {playing ? 'Stop' : `Play ${maqra.ayahCount} ayat`}
+            </Text>
+          </Pressable>
+        )}
       </View>
     </View>
   );
@@ -267,6 +372,41 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: light.textMuted,
   },
+  markToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 13,
+    borderRadius: 11,
+    backgroundColor: light.surface,
+    borderWidth: 1,
+    borderColor: light.border,
+    minHeight: 46,
+  },
+  markToggleActive: {
+    backgroundColor: light.accentSecondary,
+    borderColor: light.accentSecondary,
+  },
+  markToggleText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 14,
+    color: light.text,
+  },
+  markToggleTextActive: { color: '#FFFFFF' },
+  markCount: {
+    minWidth: 22,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 11,
+    backgroundColor: light.state.learningBg,
+    alignItems: 'center',
+  },
+  markCountText: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 12,
+    color: light.state.learningMarker,
+  },
   ayatBlock: { gap: 6 },
   surahDivider: {
     fontFamily: 'Inter_600SemiBold',
@@ -281,18 +421,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 6,
     paddingHorizontal: 8,
-  },
-  ayahRowActive: {
-    backgroundColor: light.state.playingBg,
-  },
-  arabic: {
-    fontFamily: 'NotoNaskhArabic_400Regular',
-    color: light.text,
-    textAlign: 'right',
-    writingDirection: 'rtl',
-  },
-  marker: {
-    color: light.accentSecondary,
   },
   actions: { flexDirection: 'row', gap: 10, marginTop: 8 },
   actionBtn: {

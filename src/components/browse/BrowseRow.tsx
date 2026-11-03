@@ -15,6 +15,8 @@ interface Props {
   learningPercent?: number;
   /** Right-hand counter, e.g. "12 / 26". */
   meta?: string;
+  /** Teacher corrections sitting in this portion. 0 renders nothing. */
+  mistakes?: number;
   onPress: () => void;
 }
 
@@ -26,6 +28,7 @@ export function BrowseRow({
   percent,
   learningPercent,
   meta,
+  mistakes = 0,
   onPress,
 }: Props) {
   const done = percent >= 100;
@@ -46,6 +49,11 @@ export function BrowseRow({
           <Text style={styles.title} numberOfLines={1}>
             {title}
           </Text>
+          {mistakes > 0 ? (
+            <View style={styles.mistakeBadge}>
+              <Text style={styles.mistakeBadgeText}>{mistakes} to fix</Text>
+            </View>
+          ) : null}
           {arabic ? (
             <Text style={styles.arabic} numberOfLines={1}>
               {arabic}
@@ -151,6 +159,18 @@ const styles = StyleSheet.create({
     color: light.textMuted,
     minWidth: 54,
     textAlign: 'right',
+  },
+  mistakeBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 9,
+    backgroundColor: light.state.learningBg,
+    flexShrink: 0,
+  },
+  mistakeBadgeText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 11,
+    color: light.state.learningMarker,
   },
   chevron: {
     fontFamily: 'Inter_600SemiBold',

@@ -99,3 +99,32 @@ No complete, verifiably free-licensed per-ayah recitation appears to exist.
 changing the identifier (`ar.minshawi`, `ar.alafasy`, …) and the `id`, which
 also keys the on-device cache directory — deliberately, so two encodings can
 never share one cache.
+
+## Multiple reciters (2026-11-03)
+
+`QARIS` in `src/audio/sources.ts` is now a list, and Settings → Reciter picks
+one. Eight of the nine entries come from Islamic Network under the D3 grant
+above. Each `id` still keys its own on-device cache directory, so switching
+reciter never mixes encodings; the Husary id keeps its original
+`alquran-cloud-husary-128` spelling so existing downloads are not orphaned.
+
+Editions verified present at 128 kbps: `ar.husary`, `ar.husarymujawwad`,
+`ar.alafasy`, `ar.minshawi`, `ar.shaatree`, `ar.mahermuaiqly`, `ar.hudhaify`,
+`ar.muhammadayyoub`. `ar.abdurrahmaansudais` and `ar.abdulsamad` return 403 at
+that bitrate and are therefore not listed.
+
+### Saad Al-Ghamdi — the one unlicensed entry
+
+Added on owner request. He is published by **neither** Islamic Network nor
+quran.com (checked: 190 audio editions and 12 recitations respectively, no
+Ghamdi in either). mp3quran.net carries him but only as whole-surah files,
+which cannot drive per-ayah repeat.
+
+The only per-ayah source is `everyayah.com/data/Ghamadi_40kbps/SSSAAA.mp3` —
+the host D3 moved *off*, because it publishes no audio licence at all. The
+entry therefore carries `unlicensed: true`, and the Settings row renders
+"no published licence" under the name rather than burying that fact.
+
+To undo: delete the `everyayah-ghamadi-40` entry from `QARIS`. Nothing else
+references it; a user who had it selected falls back to the default via
+`qariById`.

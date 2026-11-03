@@ -28,6 +28,7 @@ export function useMaqraPlayer(): MaqraPlayerState {
   const ayahRepeat = useAudioPrefsStore((s) => s.ayahRepeat);
   const setRepeat = useAudioPrefsStore((s) => s.setRepeat);
   const rate = useAudioPrefsStore((s) => s.rate);
+  const qariId = useAudioPrefsStore((s) => s.qariId);
   const setPlayingAyah = useSessionStore((s) => s.setPlayingAyah);
   const record = useActivityStore((s) => s.record);
 
@@ -53,6 +54,7 @@ export function useMaqraPlayer(): MaqraPlayerState {
           ayahRepeat: toRepeatCount(ayahRepeat),
           setRepeat: toRepeatCount(setRepeat),
           rate,
+          qariId,
           onProgress: (p) => {
             if (!mounted.current) return;
             setProgress(p);
@@ -75,7 +77,7 @@ export function useMaqraPlayer(): MaqraPlayerState {
         if (mounted.current) setLoading(false);
       }
     },
-    [ayahRepeat, setRepeat, rate, setPlayingAyah, record],
+    [ayahRepeat, setRepeat, rate, qariId, setPlayingAyah, record],
   );
 
   const playMaqra = useCallback((maqra: Maqra) => run(maqraAyahs(maqra), true), [run]);

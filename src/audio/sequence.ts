@@ -31,6 +31,8 @@ export interface SequenceOptions {
   /** Times the whole sequence repeats. Default 1. */
   setRepeat?: RepeatCount;
   rate?: number;
+  /** Which reciter to stream. Defaults to the project default. */
+  qariId?: string;
   /** Fired on every track start, and once with null when the run ends. */
   onProgress?: (p: SequenceProgress | null) => void;
   /** Fired after the last pass completes. Not fired on stop(). */
@@ -113,6 +115,7 @@ export async function playSequence(
 
     await playAyah(ref.surah, ref.ayah, {
       rate: opts.rate,
+      qariId: opts.qariId,
       onFinished: () => {
         if (!alive()) return;
         // Same ayah again?
@@ -157,6 +160,7 @@ export async function playSequence(
       });
       await playAyah(BASMALAH.surah, BASMALAH.ayah, {
         rate: opts.rate,
+        qariId: opts.qariId,
         onFinished: () => {
           if (alive()) void step();
         },

@@ -6,15 +6,17 @@
 // estates for free, non-commercial redistribution at the bitrates we publish",
 // and grant downstream "personal and educational use".
 //
-// That is an actual permission chain. The previous source (everyayah.com)
-// published no audio licence at all: its only licensing text covers the
-// separate timing files, and the URL it points at 404s. The "EveryAyah is
-// CC-BY-NC" claim that circulates online originates from a third party
-// *requesting* clarification, not from any rights holder granting it.
+// That is an actual permission chain. Copyright still rests with the reciters,
+// who may ask for removal. Do not re-encode or rehost these files — the grant
+// is scoped to the bitrates the CDN publishes. See docs/audio-sources.md and
+// issue #3.
 //
-// Copyright still rests with the reciters, who may ask for removal. Do not
-// re-encode or rehost these files — the grant is scoped to the bitrates the
-// CDN publishes. See docs/audio-sources.md and issue #3.
+// EXCEPTION (2026-11-03, owner request): Saad Al-Ghamdi is published by
+// neither Islamic Network nor quran.com. The only per-ayah source is
+// everyayah.com, which carries no audio licence of its own — the reason D3
+// moved off it. It is included because the owner asked for it by name, it is
+// flagged `unlicensed: true` here, and the Settings picker says so on the row.
+// Remove the entry to undo; nothing else depends on it.
 
 import structure from '@content/structure.json';
 import type { SurahMeta } from '@content/types';
@@ -22,8 +24,12 @@ import type { SurahMeta } from '@content/types';
 export interface QariSource {
   id: string;
   displayName: string;
+  /** Short note shown under the name in the picker. */
+  style: string;
   buildUrl: (surah: number, ayah: number) => string;
   attribution: string;
+  /** True when the host publishes no licence for the recordings. */
+  unlicensed?: boolean;
 }
 
 const SURAHS = structure as SurahMeta[];
@@ -55,23 +61,69 @@ export function globalAyahNumber(surah: number, ayah: number): number {
   return before + ayah;
 }
 
-// 128 kbps is the highest the CDN publishes for every edition. Changing this
-// changes the cache directory too, which is intentional: mixing encodings in
-// one cache would be worse than re-downloading.
+/** Validates surah/ayah without needing a mushaf position. */
+function assertAyah(surah: number, ayah: number): void {
+  const entry = SURAH_OFFSETS[surah];
+  if (entry === undefined) throw new RangeError(`Unknown surah: ${surah}`);
+  if (ayah < 1 || ayah > entry[1]) {
+    throw new RangeError(`Surah ${surah} has no ayah ${ayah} (1..${entry[1]})`);
+  }
+}
+
+// 128 kbps is the highest Islamic Network publishes for every edition below.
+// Changing this changes the cache directory too, which is intentional: mixing
+// encodings in one cache would be worse than re-downloading.
 const BITRATE = 128;
 
-export const QARIS: readonly QariSource[] = [
-  {
-    id: `alquran-cloud-husary-${BITRATE}`,
-    displayName: 'Mahmoud Khalil Al-Husary (murattal)',
+function islamicNetwork(edition: string, displayName: string, style: string): QariSource {
+  return {
+    // Keeps the original `alquran-cloud-husary-128` shape: the id doubles as
+    // the on-device cache directory, so renaming it would orphan every file
+    // already downloaded.
+    id: `alquran-cloud-${edition.replace(/^ar\./, '')}-${BITRATE}`,
+    displayName,
+    style,
     buildUrl: (surah, ayah) =>
-      `https://cdn.islamic.network/quran/audio/${BITRATE}/ar.husary/${globalAyahNumber(surah, ayah)}.mp3`,
-    attribution: 'Mahmoud Khalil Al-Husary — Al Quran Cloud (cdn.islamic.network)',
+      `https://cdn.islamic.network/quran/audio/${BITRATE}/${edition}/${globalAyahNumber(surah, ayah)}.mp3`,
+    attribution: `${displayName} — Al Quran Cloud (cdn.islamic.network)`,
+  };
+}
+
+function pad3(n: number): string {
+  return n.toString().padStart(3, '0');
+}
+
+export const QARIS: readonly QariSource[] = [
+  islamicNetwork('ar.husary', 'Mahmoud Khalil Al-Husary', 'Murattal · teaching standard'),
+  {
+    // See the EXCEPTION note at the top of this file.
+    id: 'everyayah-ghamadi-40',
+    displayName: 'Saad Al-Ghamdi',
+    style: 'Murattal · 40 kbps',
+    buildUrl: (surah, ayah) => {
+      assertAyah(surah, ayah);
+      return `https://everyayah.com/data/Ghamadi_40kbps/${pad3(surah)}${pad3(ayah)}.mp3`;
+    },
+    attribution: 'Saad Al-Ghamdi — everyayah.com',
+    unlicensed: true,
   },
+  islamicNetwork('ar.alafasy', 'Mishary Rashid Alafasy', 'Murattal'),
+  islamicNetwork('ar.minshawi', 'Mohamed Siddiq Al-Minshawi', 'Murattal'),
+  islamicNetwork('ar.shaatree', 'Abu Bakr Ash-Shaatree', 'Murattal'),
+  islamicNetwork('ar.mahermuaiqly', 'Maher Al Muaiqly', 'Murattal'),
+  islamicNetwork('ar.hudhaify', 'Ali Al-Hudhaify', 'Murattal'),
+  islamicNetwork('ar.muhammadayyoub', 'Muhammad Ayyoub', 'Murattal'),
+  islamicNetwork('ar.husarymujawwad', 'Mahmoud Khalil Al-Husary', 'Mujawwad · slower'),
 ];
 
 export const DEFAULT_QARI = QARIS[0]!;
 
-export function urlFor(surah: number, ayah: number): string {
-  return DEFAULT_QARI.buildUrl(surah, ayah);
+export function qariById(id: string | undefined): QariSource {
+  if (!id) return DEFAULT_QARI;
+  return QARIS.find((q) => q.id === id) ?? DEFAULT_QARI;
+}
+
+/** URL for an ayah from a specific qari (defaults to the project default). */
+export function urlFor(surah: number, ayah: number, qariId?: string): string {
+  return qariById(qariId).buildUrl(surah, ayah);
 }

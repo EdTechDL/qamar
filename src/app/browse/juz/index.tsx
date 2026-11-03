@@ -6,11 +6,14 @@ import { View } from 'react-native';
 import { BrowseRow } from '@components/browse/BrowseRow';
 import { Screen } from '@components/primitives/Screen';
 import { TOTAL_JUZ, combinedProgress, maqraRangeLabel, maqrasInJuz } from '@core/maqra';
+import { combinedMistakeCount } from '@core/mistakes';
 import { useHifzStore } from '@stores/hifz';
+import { useMistakesStore } from '@stores/mistakes';
 
 export default function JuzListScreen() {
   const router = useRouter();
   const records = useHifzStore((s) => s.records);
+  const marks = useMistakesStore((s) => s.marks);
 
   const rows = useMemo(
     () =>
@@ -24,15 +27,15 @@ export default function JuzListScreen() {
           first && last
             ? `${maqraRangeLabel(first).split('–')[0]!.trim()} → ${maqraRangeLabel(last).split(/–| – /).pop()!.trim()}`
             : '';
-        return { juz, progress, span };
+        return { juz, progress, span, mistakes: combinedMistakeCount(marks, maqras) };
       }),
-    [records],
+    [records, marks],
   );
 
   return (
     <Screen title="Juz" subtitle={`${TOTAL_JUZ} parts of the mushaf`}>
       <View style={{ gap: 10 }}>
-        {rows.map(({ juz, progress, span }) => (
+        {rows.map(({ juz, progress, span, mistakes }) => (
           <BrowseRow
             key={juz}
             badge={juz}
@@ -41,6 +44,7 @@ export default function JuzListScreen() {
             percent={progress.percent}
             learningPercent={(progress.learning / progress.total) * 100}
             meta={`${progress.memorized} / ${progress.total}`}
+            mistakes={mistakes}
             onPress={() => router.push(`/browse/juz/${juz}` as never)}
           />
         ))}

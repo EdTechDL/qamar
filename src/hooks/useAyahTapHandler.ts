@@ -8,6 +8,7 @@ import type { SurahMeta } from '@content/types';
 import { useActivityStore } from '@stores/activity';
 import { useHifzStore } from '@stores/hifz';
 import { useSessionStore } from '@stores/session';
+import { useAudioPrefsStore } from '@stores/audioPrefs';
 import { useUiStore } from '@stores/ui';
 const CYCLE: Record<'none' | 'learning' | 'memorized', 'learning' | 'memorized' | 'none'> = {
   none: 'learning',
@@ -32,6 +33,7 @@ export function useAyahTapHandler() {
   const records = useHifzStore((s) => s.records);
   const showToast = useUiStore((s) => s.showToast);
   const record = useActivityStore((s) => s.record);
+  const qariId = useAudioPrefsStore((s) => s.qariId);
 
   return useCallback(
     (surah: number, ayah: number) => {
@@ -45,7 +47,7 @@ export function useAyahTapHandler() {
         void (async () => {
           await stopPlayback();
           await ensureAudioConfigured();
-          await playRange(surah, ayah, ayahCount, setPlayingAyah);
+          await playRange(surah, ayah, ayahCount, setPlayingAyah, { qariId });
         })();
         return;
       }
@@ -88,7 +90,7 @@ export function useAyahTapHandler() {
           await ensureAudioConfigured();
           // Single-ayah play through playRange so the basmalah prefix
           // rule applies (fromAyah === 1 & non-Fatiha/Tawba).
-          await playRange(surah, ayah, ayah, setPlayingAyah);
+          await playRange(surah, ayah, ayah, setPlayingAyah, { qariId });
         })();
         return;
       }
@@ -114,6 +116,7 @@ export function useAyahTapHandler() {
       playingAyah,
       setPlayingAyah,
       record,
+      qariId,
     ],
   );
 }

@@ -14,7 +14,9 @@ import {
   maqrasInHizb,
   maqrasInJuz,
 } from '@core/maqra';
+import { maqraMistakeCount } from '@core/mistakes';
 import { useHifzStore } from '@stores/hifz';
+import { useMistakesStore } from '@stores/mistakes';
 import { light } from '@theme/colors';
 
 export default function JuzDetailScreen() {
@@ -22,6 +24,7 @@ export default function JuzDetailScreen() {
   const { juzId } = useLocalSearchParams<{ juzId: string }>();
   const juz = Number(juzId) || 1;
   const records = useHifzStore((s) => s.records);
+  const marks = useMistakesStore((s) => s.marks);
 
   const { hizbs, overall } = useMemo(() => {
     const all = maqrasInJuz(juz);
@@ -62,6 +65,7 @@ export default function JuzDetailScreen() {
                 percent={p.percent}
                 learningPercent={(p.learning / p.total) * 100}
                 meta={`${p.memorized} / ${p.total}`}
+                mistakes={maqraMistakeCount(marks, maqra)}
                 onPress={() => router.push(`/browse/maqra/${maqra.id}` as never)}
               />
             );

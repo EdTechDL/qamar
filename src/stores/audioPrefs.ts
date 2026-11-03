@@ -4,6 +4,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { DEFAULT_QARI } from '@audio/sources';
 
 /** `0` is the stored stand-in for Infinity — JSON has no Infinity literal. */
 export const INFINITE = 0;
@@ -29,6 +30,9 @@ interface AudioPrefsState {
   setSetRepeat: (n: number) => void;
   rate: number;
   setRate: (n: number) => void;
+  /** Selected reciter id — see @audio/sources QARIS. */
+  qariId: string;
+  setQariId: (id: string) => void;
 }
 
 export const useAudioPrefsStore = create<AudioPrefsState>()(
@@ -40,6 +44,8 @@ export const useAudioPrefsStore = create<AudioPrefsState>()(
       setSetRepeat: (n) => set({ setRepeat: n }),
       rate: 1,
       setRate: (n) => set({ rate: n }),
+      qariId: DEFAULT_QARI.id,
+      setQariId: (id) => set({ qariId: id }),
     }),
     {
       name: 'qamar.audioPrefs.v1',

@@ -22,6 +22,7 @@ import type { AyahIndex, AyahText, SurahMeta } from '@content/types';
 import { keyOf } from '@core/hifz';
 import { useNotesStore } from '@stores/notes';
 import { useSettingsStore } from '@stores/settings';
+import { useAudioPrefsStore } from '@stores/audioPrefs';
 import { useSessionStore } from '@stores/session';
 import { useAyahTapHandler } from '../../../hooks/useAyahTapHandler';
 import { light } from '@theme/colors';
@@ -56,6 +57,7 @@ export default function ReadingViewScreen() {
   const setReadingMode = useSessionStore((s) => s.setReadingMode);
   const playingAyah = useSessionStore((s) => s.playingAyah);
   const fontScale = useSettingsStore((s) => s.fontScale);
+  const qariId = useAudioPrefsStore((s) => s.qariId);
   const readingFontSize = arabicSize(fontScale);
   const surahNoteCount = useNotesStore((s) =>
     s.notes.reduce((n, note) => (note.scope === 'surah' && note.surah === id ? n + 1 : n), 0),
@@ -76,6 +78,7 @@ export default function ReadingViewScreen() {
       startAyah,
       surahMeta?.ayahCount ?? 1,
       setPlayingAyah,
+      { qariId },
     );
     playbackHandleRef.current = handle;
   };
