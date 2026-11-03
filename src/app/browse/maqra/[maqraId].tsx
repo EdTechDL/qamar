@@ -27,9 +27,12 @@ import {
   surahName,
 } from '@core/maqra';
 import { expandToWord, marksForAyah, segmentArabic, sliceClusters } from '@core/mistakes';
+import { qariById } from '@audio/sources';
+import { unlockWebAudio } from '@audio/webAudio';
 import { useMaqraPlayer } from '../../../hooks/useMaqraPlayer';
 import { useActivityStore } from '@stores/activity';
 import { useHifzStore } from '@stores/hifz';
+import { useAudioPrefsStore } from '@stores/audioPrefs';
 import { useMistakesStore } from '@stores/mistakes';
 import { useSettingsStore } from '@stores/settings';
 import { useUiStore } from '@stores/ui';
@@ -46,6 +49,7 @@ export default function MaqraSessionScreen() {
   const applyRange = useHifzStore((s) => s.applyRange);
   const record = useActivityStore((s) => s.record);
   const fontScale = useSettingsStore((s) => s.fontScale);
+  const qariId = useAudioPrefsStore((s) => s.qariId);
   const allMarks = useMistakesStore((s) => s.marks);
   const addMark = useMistakesStore((s) => s.addMark);
   const removeMark = useMistakesStore((s) => s.removeMark);
@@ -198,27 +202,40 @@ export default function MaqraSessionScreen() {
 
           {!marking && <RepeatControls />}
 
-          <Pressable
-            onPress={() => {
-              setMarking((v) => !v);
-              setSelection(null);
-              setTarget(null);
-              if (!marking) void stop();
-            }}
-            style={[styles.markToggle, marking && styles.markToggleActive]}
-            accessibilityRole="switch"
-            accessibilityState={{ checked: marking }}
-          >
-            <Highlighter size={16} color={marking ? '#FFFFFF' : light.text} />
-            <Text style={[styles.markToggleText, marking && styles.markToggleTextActive]}>
-              {marking ? 'Done marking' : 'Mark mistakes'}
-            </Text>
-            {maqraMarkCount > 0 && !marking ? (
-              <View style={styles.markCount}>
-                <Text style={styles.markCountText}>{maqraMarkCount}</Text>
-              </View>
-            ) : null}
-          </Pressable>
+          {!marking && (
+            <Pressable
+              onPress={() => router.push('/settings')}
+              style={styles.reciterRow}
+              accessibilityRole="button"
+            >
+              <Text style={styles.reciterLabel}>Reciter</Text>
+              <Text style={styles.reciterName} numberOfLines={1}>
+                {qariById(qariId).displayName}
+              </Text>
+              <Text style={styles.reciterChevron}>›</Text>
+            </Pressable>
+          )}
+
+          {!marking && (
+            <Pressable
+              onPress={() => {
+                setMarking(true);
+                setSelection(null);
+                setTarget(null);
+                void stop();
+              }}
+              style={styles.markToggle}
+              accessibilityRole="button"
+            >
+              <Highlighter size={16} color={light.text} />
+              <Text style={styles.markToggleText}>Mark mistakes</Text>
+              {maqraMarkCount > 0 ? (
+                <View style={styles.markCount}>
+                  <Text style={styles.markCountText}>{maqraMarkCount}</Text>
+                </View>
+              ) : null}
+            </Pressable>
+          )}
 
           <View style={styles.ayatBlock}>
             {ayat.map(({ surah, ayah, text }, i) => {
@@ -268,17 +285,29 @@ export default function MaqraSessionScreen() {
           <MistakeDock
             excerpt={excerpt}
             canSave={selection !== null}
+            savedCount={maqraMarkCount}
             onSave={saveMark}
             onExpandWord={expandSelection}
             onCancel={() => {
               setSelection(null);
               setTarget(null);
             }}
-            hint="Drag across the text, or tap a highlight to clear it"
+            onDone={() => {
+              setMarking(false);
+              setSelection(null);
+              setTarget(null);
+            }}
+            hint="Drag across a word or letter. Tap a highlight to clear it."
           />
         ) : (
           <Pressable
-            onPress={() => (playing ? void stop() : void playMaqra(maqra))}
+            onPress={() => {
+              // Synchronous, inside the gesture: iOS only unlocks the audio
+              // element here, never in the async work that follows.
+              unlockWebAudio();
+              if (playing) void stop();
+              else void playMaqra(maqra);
+            }}
             style={styles.playBtn}
             accessibilityRole="button"
             accessibilityLabel={playing ? 'Stop' : 'Play this maqra'}
@@ -372,6 +401,37 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: light.textMuted,
   },
+  reciterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 11,
+    backgroundColor: light.surface,
+    borderWidth: 1,
+    borderColor: light.border,
+    minHeight: 46,
+  },
+  reciterLabel: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 11,
+    color: light.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+  reciterName: {
+    flex: 1,
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 14,
+    color: light.text,
+    textAlign: 'right',
+  },
+  reciterChevron: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 18,
+    color: light.border,
+  },
   markToggle: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -384,16 +444,11 @@ const styles = StyleSheet.create({
     borderColor: light.border,
     minHeight: 46,
   },
-  markToggleActive: {
-    backgroundColor: light.accentSecondary,
-    borderColor: light.accentSecondary,
-  },
   markToggleText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 14,
     color: light.text,
   },
-  markToggleTextActive: { color: '#FFFFFF' },
   markCount: {
     minWidth: 22,
     paddingHorizontal: 6,

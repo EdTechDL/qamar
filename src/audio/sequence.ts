@@ -37,6 +37,8 @@ export interface SequenceOptions {
   onProgress?: (p: SequenceProgress | null) => void;
   /** Fired after the last pass completes. Not fired on stop(). */
   onDone?: () => void;
+  /** Playback failed. The run halts rather than racing to the end. */
+  onError?: () => void;
 }
 
 export interface SequenceHandle {
@@ -116,6 +118,12 @@ export async function playSequence(
     await playAyah(ref.surah, ref.ayah, {
       rate: opts.rate,
       qariId: opts.qariId,
+      onError: () => {
+        if (!alive()) return;
+        sequenceGeneration += 1;
+        opts.onProgress?.(null);
+        opts.onError?.();
+      },
       onFinished: () => {
         if (!alive()) return;
         // Same ayah again?

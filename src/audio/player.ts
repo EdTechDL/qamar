@@ -1,13 +1,23 @@
-// Playback engine. SPEC §12.5. Single active Sound at a time — call playAyah()
-// to preempt anything already playing. Repeat/range/speed are follow-up work.
+// Playback engine. SPEC §12.5. Single active sound at a time — call playAyah()
+// to preempt anything already playing.
+//
+// Web and native take different paths on purpose: see ./webAudio for why iOS
+// needs one reused element rather than expo-av's element-per-clip.
 
 import { Audio, type AVPlaybackStatus } from 'expo-av';
 import { resolveAudioUri } from './cache';
+import { urlFor } from './sources';
+import { isWeb, playWebUrl, stopWebAudio, type WebPlayHandle } from './webAudio';
 
 let current: Audio.Sound | null = null;
+let currentWeb: WebPlayHandle | null = null;
 let generation = 0;
 
 async function unloadCurrent(): Promise<void> {
+  if (currentWeb) {
+    currentWeb.stop();
+    currentWeb = null;
+  }
   if (!current) return;
   try {
     await current.unloadAsync();
@@ -24,9 +34,45 @@ export interface PlayHandle {
 export async function playAyah(
   surah: number,
   ayah: number,
-  opts: { rate?: number; qariId?: string; onFinished?: () => void } = {},
+  opts: {
+    rate?: number;
+    qariId?: string;
+    onFinished?: () => void;
+    /** Playback could not start or died mid-clip. */
+    onError?: () => void;
+  } = {},
 ): Promise<PlayHandle> {
   const gen = ++generation;
+
+  if (isWeb()) {
+    // No cache lookup and no await before play(): the URL is derived
+    // synchronously so the element starts as close to the gesture as possible.
+    await unloadCurrent();
+    if (gen !== generation) return { stop: async () => {} };
+
+    const handle = playWebUrl(urlFor(surah, ayah, opts.qariId), {
+      rate: opts.rate,
+      onFinished: () => {
+        if (gen === generation) opts.onFinished?.();
+      },
+      // A refused or interrupted play() must NOT be treated as "clip done".
+      // On a weak phone connection that would march through the whole maqra
+      // in a second, silently, which looks exactly like the bug it hides.
+      onError: () => {
+        if (gen === generation) opts.onError?.();
+      },
+    });
+    currentWeb = handle;
+    return {
+      stop: async () => {
+        if (currentWeb === handle) {
+          handle.stop();
+          currentWeb = null;
+        }
+      },
+    };
+  }
+
   await unloadCurrent();
   if (gen !== generation) return { stop: async () => {} };
 
@@ -61,6 +107,7 @@ export async function playAyah(
 export async function stopPlayback(): Promise<void> {
   generation += 1;
   sequenceGen += 1;
+  stopWebAudio();
   await unloadCurrent();
 }
 
@@ -137,6 +184,10 @@ let configured = false;
 export async function ensureAudioConfigured(): Promise<void> {
   if (configured) return;
   configured = true;
+  // setAudioModeAsync is a native session concept; on web it either no-ops or
+  // throws depending on the expo-av version, and we manage the element
+  // ourselves anyway.
+  if (isWeb()) return;
   try {
     await Audio.setAudioModeAsync({
       playsInSilentModeIOS: true,

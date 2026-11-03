@@ -3,6 +3,7 @@
 
 import { useCallback } from 'react';
 import { ensureAudioConfigured, playAyah, playRange, stopPlayback } from '@audio/player';
+import { unlockWebAudio } from '@audio/webAudio';
 import structure from '@content/structure.json';
 import type { SurahMeta } from '@content/types';
 import { useActivityStore } from '@stores/activity';
@@ -37,6 +38,9 @@ export function useAyahTapHandler() {
 
   return useCallback(
     (surah: number, ayah: number) => {
+      // This runs straight off the tap, so it is the right place to unlock
+      // iOS audio for every mode that can start playback.
+      unlockWebAudio();
       // Playback state overrides toolbar modes ONLY while reading (no
       // toolbar mode active). In Listen/Marquer/etc. the mode's behavior
       // wins so users can e.g. play a single ayah in Listen without

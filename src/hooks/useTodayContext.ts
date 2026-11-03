@@ -47,8 +47,7 @@ export function useTodayContext(): TodayContext {
       ? {
           surah: lastLearning.surah,
           ayah: lastLearning.ayah,
-          surahName:
-            META.find((m) => m.id === lastLearning.surah)?.nameTransliterated ?? '',
+          surahName: META.find((m) => m.id === lastLearning.surah)?.nameTransliterated ?? '',
         }
       : null;
 

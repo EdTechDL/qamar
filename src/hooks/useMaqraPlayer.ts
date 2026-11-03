@@ -72,6 +72,12 @@ export function useMaqraPlayer(): MaqraPlayerState {
             if (!mounted.current) return;
             if (isMaqra) record('maqrasReviewed');
           },
+          onError: () => {
+            if (!mounted.current) return;
+            setPlaying(false);
+            setProgress(null);
+            setPlayingAyah(null);
+          },
         });
       } finally {
         if (mounted.current) setLoading(false);

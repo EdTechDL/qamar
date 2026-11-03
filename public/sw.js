@@ -100,20 +100,44 @@ async function staleWhileRevalidate(request) {
   return hit || (await network) || Response.error();
 }
 
+// How long a navigation waits for the network before falling back to cache.
+const SHELL_NETWORK_TIMEOUT_MS = 3500;
+
 // SPA: every navigation resolves to the one app shell, and expo-router takes
 // it from there. This is what makes deep links work offline.
+//
+// Network-first, NOT cache-first. The shell names the content-hashed bundle,
+// so serving it straight from cache without ever revalidating pins a device
+// to whichever build it first installed — a phone can sit on a months-old
+// bundle while the desktop is current, with no way for the user to tell. The
+// timeout keeps the offline promise: if the network does not answer quickly,
+// the cached shell is served exactly as before.
 async function navigationStrategy(request) {
   const cache = await caches.open(SHELL_CACHE);
+
+  try {
+    const fresh = await Promise.race([
+      fetch(request),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('shell timeout')), SHELL_NETWORK_TIMEOUT_MS),
+      ),
+    ]);
+    if (fresh && fresh.ok) {
+      // Keep the offline copy in step with what was just served.
+      void cache.put(SHELL_URL, fresh.clone());
+      return fresh;
+    }
+  } catch {
+    // fall through to cache
+  }
+
   const shell = await cache.match(SHELL_URL);
   if (shell) return shell;
-  try {
-    return await fetch(request);
-  } catch {
-    return new Response('Hors ligne', {
-      status: 503,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-    });
-  }
+
+  return new Response('Offline', {
+    status: 503,
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+  });
 }
 
 self.addEventListener('fetch', (event) => {

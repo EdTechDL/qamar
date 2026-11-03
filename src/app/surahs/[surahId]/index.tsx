@@ -8,6 +8,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { NotebookPen, Play, Square } from 'lucide-react-native';
 import { ensureAudioConfigured, playRange, stopPlayback } from '@audio/player';
+import { unlockWebAudio } from '@audio/webAudio';
 import { AyahBlock } from '@components/quran/AyahBlock';
 import { ContinuousPage } from '@components/quran/ContinuousPage';
 import { NoteEditorSheet } from '@components/quran/NoteEditorSheet';
@@ -147,12 +148,13 @@ export default function ReadingViewScreen() {
         </View>
         <Pressable
           onPress={() => {
+            unlockWebAudio();
             if (isPlayingSurah) void stopSurahPlayback();
             else void startPlaybackFromAyah(1);
           }}
           hitSlop={12}
           style={styles.playBtn}
-          accessibilityLabel={isPlayingSurah ? 'Stop playback' : 'Lecture continue'}
+          accessibilityLabel={isPlayingSurah ? 'Stop playback' : 'Play from the start'}
         >
           {isPlayingSurah ? (
             <Square size={18} color={light.state.playingMarker} fill={light.state.playingMarker} />

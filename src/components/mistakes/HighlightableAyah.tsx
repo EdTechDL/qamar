@@ -205,8 +205,13 @@ export function HighlightableAyah({
 
 const styles = StyleSheet.create({
   editing: {
-    // RNW passes this through; it is a no-op on native.
-    touchAction: 'none',
+    // pan-y, not none: `none` hands every gesture to us, which also means the
+    // page stops scrolling wherever a finger lands on text — and since the
+    // text is most of the screen, the user gets stuck. `pan-y` leaves vertical
+    // scrolling to the browser and still delivers the horizontal drags a
+    // highlight is actually painted with. RNW passes this through; it is a
+    // no-op on native.
+    touchAction: 'pan-y',
     userSelect: 'none',
   } as object,
   playing: {

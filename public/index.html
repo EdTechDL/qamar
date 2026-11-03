@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <!--
   Web app shell. Overrides the default Expo template (see
   @expo/cli/static/template/index.html) - the CLI reads public/index.html
@@ -61,16 +61,35 @@
   </head>
 
   <body>
-    <noscript>Cette application nécessite JavaScript pour fonctionner.</noscript>
+    <noscript>This app needs JavaScript to run.</noscript>
     <!-- The root element for your Expo app. -->
     <div id="root"></div>
 
     <script>
       if ('serviceWorker' in navigator) {
+        // A new worker calls skipWaiting() on install, so it takes control as
+        // soon as it is ready. The page it takes over is still running the
+        // PREVIOUS bundle, though, which is how a phone ends up showing an
+        // older app than the desktop. Reload once on handover so the build the
+        // user sees always matches the worker serving it.
+        var reloading = false;
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (reloading) return;
+          reloading = true;
+          window.location.reload();
+        });
+
         window.addEventListener('load', function () {
-          navigator.serviceWorker.register('/sw.js').catch(function (error) {
-            console.warn('Service worker registration failed', error);
-          });
+          navigator.serviceWorker
+            .register('/sw.js')
+            .then(function (registration) {
+              // Catches the case where the app is opened from the home screen
+              // and simply resumed, which does not always re-check the worker.
+              registration.update();
+            })
+            .catch(function (error) {
+              console.warn('Service worker registration failed', error);
+            });
         });
       }
     </script>

@@ -4,6 +4,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ensureAudioConfigured, playRange, stopPlayback } from '@audio/player';
+import { unlockWebAudio } from '@audio/webAudio';
 import { useSessionStore } from '@stores/session';
 import { useAudioPrefsStore } from '@stores/audioPrefs';
 
@@ -23,6 +24,7 @@ export function useAyahAudio() {
 
   const play = useCallback(
     async (surah: number, ayah: number) => {
+      unlockWebAudio();
       setLoading(true);
       try {
         // Route through playRange so the basmalah prefix applies uniformly
@@ -49,8 +51,7 @@ export function useAyahAudio() {
   }, [setPlayingAyah]);
 
   const isPlaying = useCallback(
-    (surah: number, ayah: number) =>
-      playingAyah?.surah === surah && playingAyah?.ayah === ayah,
+    (surah: number, ayah: number) => playingAyah?.surah === surah && playingAyah?.ayah === ayah,
     [playingAyah],
   );
 
